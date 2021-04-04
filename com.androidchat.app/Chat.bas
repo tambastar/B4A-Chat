@@ -27,8 +27,8 @@ Public Sub Initialize(Parent As B4XView)
 	TextField.NextField = TextField
 End Sub
 
+'Buid message design
 Private Sub BuildMessage (Text As String, User As String) As List
-	'Buid message design
 	Dim title As BCTextRun = Engine.CreateRun(User & CRLF)
 	title.TextFont  = BBCodeView1.ParseData.DefaultBoldFont
 	Dim TextRun As BCTextRun = Engine.CreateRun(Text & CRLF)
@@ -36,6 +36,54 @@ Private Sub BuildMessage (Text As String, User As String) As List
 	time.TextFont = xui.CreateDefaultFont(10)
 	time.TextColor = xui.Color_Gray
 	Return Array(title, TextRun, time)
+End Sub
+'initiate image
+Private Sub CreateImageView As B4XView
+	Dim iv As ImageView
+	iv.Initialize("")
+	Return iv
+End Sub
+
+'return image created
+Private Sub GetBitmap (iv As ImageView) As B4XBitmap
+	Return iv.Bitmap
+End Sub
+
+'function to change 
+Private Sub DrawBubble (Width As Int, Height As Int, Right As Boolean) As B4XBitmap
+	'The bubble doesn't need to be high density as it is a simple drawing.
+	Width = Ceil(Width / xui.Scale)
+	Height = Ceil(Height / xui.Scale)
+	Dim ScaledGap As Int = Ceil(Gap / xui.Scale)
+	Dim ScaledArrowWidth As Int = Ceil(ArrowWidth / xui.Scale)
+	Dim nw As Int = Width + 2 * ScaledGap + ScaledArrowWidth
+	Dim nh As Int = Height + 2 * ScaledGap
+	If bc.mWidth < nw Or bc.mHeight < nh Then
+		bc.Initialize(Max(bc.mWidth, nw), Max(bc.mHeight, nh))
+	End If
+	bc.DrawRect(bc.TargetRect, xui.Color_Transparent, True, 0)
+	Dim r As B4XRect
+	Dim path As BCPath
+	Dim clr As Int
+	If Right Then clr = 0xFFEFEFEF Else clr = 0xFFC1F7A3
+	If Right Then
+		r.Initialize(0, 0, nw - ScaledArrowWidth, nh)
+		path.Initialize(nw - 1, 1)
+		path.LineTo(nw - 1 - (10 + ScaledArrowWidth), 1)
+		path.LineTo(nw - 1 - ScaledArrowWidth, 10)
+		path.LineTo(nw - 1, 1)
+	Else
+		r.Initialize(ScaledArrowWidth, 1, nw, nh)
+		path.Initialize(1, 1)
+		path.LineTo((10 + ScaledArrowWidth), 1)
+		path.LineTo(ScaledArrowWidth, 10)
+		path.LineTo(1, 1)
+	End If
+	bc.DrawRectRounded(r, clr, True, 0, 10)
+	bc.DrawPath(path, clr, True, 0)
+	bc.DrawPath(path, clr, False, 2)
+	Dim b As B4XBitmap = bc.Bitmap
+	Return b.Crop(0, 1, nw, nh)
 End Sub
 
 Private Sub AddItem (Text As String, Right As Boolean)
